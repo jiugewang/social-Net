@@ -33,23 +33,26 @@ edges = []
 cnn_socialNet_read_data.add_flag_graph(test_G, social_list)
 for (u, v, flag) in test_G.edges.data('flag'):
     # print(u, v, flag)
-    edges.append((u, v))
+    edges.append(((u, v), int(flag)))
 
 # 获取每条边的矩阵
 train_x = []
 for i in range(len(edges)):
-    matrix, row, clown = cnn_socialNet_deal_data.get_jump2_3dimension_different_size_matrix(test_G, edges[i])
-    train_x.append(matrix)
-    print("matrix", matrix)
-    print("矩阵的大小 %d %d" % (row, clown))
+    matrix, row, clown = cnn_socialNet_deal_data.get_jump1_3dimension_different_size_matrix(test_G, edges[i][0])
+    train_x.append((matrix, edges[i][1], edges[i][0]))
+    # print("matrix", matrix)
+    # print("flag", edges[i][1])
+    # print("矩阵的大小 %d %d" % (row, clown))
+
 
 # 将矩阵构造的图片写入tensorboard，进行可视化
 sess = tf.Session()
-writer = tf.summary.FileWriter('./log')
+writer = tf.summary.FileWriter('./logdiffjump1')
 for i in range(len(train_x)):
-    image = tf.convert_to_tensor(train_x[i])
+    image = tf.convert_to_tensor(train_x[i][0])
     image = tf.image.convert_image_dtype(image, tf.float32)
-    summary_op = tf.summary.image("image%d" % i, tf.expand_dims(image, 0))
+    resize_image = tf.image.resize_images(image, [128, 128], method=3)
+    summary_op = tf.summary.image("image%d-%d-(%s,%s)" % (i, train_x[i][1], train_x[i][2][0], train_x[i][2][1]), tf.expand_dims(resize_image, 0))
     summary = sess.run(summary_op)
     writer.add_summary(summary)
     print('write %d image' % i)
