@@ -188,6 +188,7 @@ def validate(test_x, tfsavepath):
     predict = output
 
     saver = tf.train.Saver()
+    writer = tf.summary.FileWriter('./logdiffjump1')
     with tf.Session() as sess:
         saver.restore(sess, tfsavepath)
         right = 0
@@ -197,6 +198,13 @@ def validate(test_x, tfsavepath):
             tmp_test.append(test_x[i])
             res = sess.run([predict, tf.argmax(output, 1)], feed_dict={x_data: tmp_test, keep_prob_5: 1.0, keep_prob_75: 1.0})
             print(res[1][0])
+            image = tf.convert_to_tensor(test_x[i])
+            image = tf.image.convert_image_dtype(image, tf.float32)
+            resize_image = tf.image.resize_images(image, [128, 128], method=3)
+            summary_op = tf.summary.image("image%d-%d-%d" % (i, res[1][0], test_y[i][0]), tf.expand_dims(resize_image, 0))
+            summary = sess.run(summary_op)
+            writer.add_summary(summary)
+            print('write %d image' % i)
             if (res[1][0] == 0 and int(test_y[i][2]) == 1):
                 right = right + 1
             elif (res[1][0] == 1 and int(test_y[i][3]) == 1):
