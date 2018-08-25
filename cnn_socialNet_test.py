@@ -21,6 +21,7 @@ def get_test_data():
     social_list = cnn_socialNet_read_data.get_standard_network(file_path_community)
     my_graph = cnn_socialNet_read_data.get_graph(file_path_network)
     cnn_socialNet_read_data.add_flag_graph(my_graph, social_list)
+    sess = tf.InteractiveSession()
     edges = []
     for (u, v, flag) in my_graph.edges.data('flag'):
         # print(u, v, flag)
@@ -30,13 +31,18 @@ def get_test_data():
             flag1_count = flag1_count + 1
         edges.append(((u, v), flag))
     for j in range(len(edges)):
-        matrix = cnn_socialNet_deal_data.get_jump2_3dimension_128matrix(my_graph, edges[j][0])
+        matrix, row, clown = cnn_socialNet_deal_data.get_jump2_3dimension_different_size_matrix(my_graph, edges[j][0])
+        image = tf.convert_to_tensor(matrix)
+        image = tf.image.convert_image_dtype(image, tf.float32)
+        resize_image = tf.image.resize_images(image, [128, 128], method=3)
+        img_numpy = resize_image.eval(session=sess)
         # print(edges[j][1])
         if int(edges[j][1]) == 1:
             label = [1, 0]
         else:
             label = [0, 1]
-        train_x_y.append((matrix, label))
+        train_x_y.append((img_numpy, label))
+    sess.close()
     return train_x_y, flag0_count, flag1_count
 
 
@@ -191,34 +197,41 @@ def validate(test_x, tfsavepath):
     writer = tf.summary.FileWriter('./logdiffjump1')
     with tf.Session() as sess:
         saver.restore(sess, tfsavepath)
-        right = 0
-        error = 0
+        right0 = 0
+        right1 = 0
+        error0 = 0
+        error1 = 0
         for i in range(len(test_x)):
             tmp_test = []
             tmp_test.append(test_x[i])
             res = sess.run([predict, tf.argmax(output, 1)], feed_dict={x_data: tmp_test, keep_prob_5: 1.0, keep_prob_75: 1.0})
-            print(res[1][0])
+            # print(res)
+            # print(res[1][0])
             image = tf.convert_to_tensor(test_x[i])
             image = tf.image.convert_image_dtype(image, tf.float32)
             resize_image = tf.image.resize_images(image, [128, 128], method=3)
-            summary_op = tf.summary.image("image%d-%d-%d" % (i, res[1][0], test_y[i][0]), tf.expand_dims(resize_image, 0))
+            global the_flag
+            if res[1][0] == 0:
+                the_flag = 1
+            elif res[1][0] == 1:
+                the_flag = 0
+            summary_op = tf.summary.image("image%d-%d-%d" % (i, the_flag, test_y[i][0]), tf.expand_dims(resize_image, 0))
             summary = sess.run(summary_op)
             writer.add_summary(summary)
             print('write %d image' % i)
-            if (res[1][0] == 0 and int(test_y[i][2]) == 1):
-                right = right + 1
-            elif (res[1][0] == 1 and int(test_y[i][3]) == 1):
-                right = right + 1
+            if the_flag == 1 and test_y[i][0] == 1:
+                right0 = right0 + 1
+            elif the_flag == 0 and test_y[i][0] == 0:
+                right1 = right1 + 1
+            elif the_flag == 1 and test_y[i][0] == 0:
+                error0 = error0 + 1
             else:
-                error = error + 1
-                # print(test_y[i])
-                # print(res)
-                # print(res[1][0])
-                # print(test_y[i][2])
-                # print(right)
-        print(right)
-        print(error)
-        print(right / (right + error))
+                error1 = error1 + 1
+        print('right0:', right0)
+        print('right1:', right1)
+        print('error0:', error0)
+        print('error1:', error1)
+        print((right0+right1)/(right0+right1+error0+error1))
 
 
 if __name__ == '__main__':
