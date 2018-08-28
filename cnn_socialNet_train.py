@@ -16,7 +16,7 @@ def get_train_data():
     flag0_count = 0
     flag1_count = 0
     sess = tf.InteractiveSession()
-    for i in range(1, 2):
+    for i in range(1, 10):
         file_path_community = './0814data/%d/community-standard.txt' % i
         file_path_network = './0814data/%d/network.txt' % i
         # print(file_path_network)
@@ -32,7 +32,7 @@ def get_train_data():
                 flag1_count = flag1_count + 1
             edges.append(((u, v), flag))
         for j in range(len(edges)):
-            matrix, row, clown = cnn_socialNet_deal_data.get_jump2_3dimension_different_size_matrix(my_graph, edges[j][0])
+            matrix, row, clown = cnn_socialNet_deal_data.get_jump1_3dimension_different_size_matrix(my_graph, edges[j][0])
             image = tf.convert_to_tensor(matrix)
             image = tf.image.convert_image_dtype(image, tf.float32)
             resize_image = tf.image.resize_images(image, [128, 128], method=3)
