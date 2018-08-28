@@ -20,19 +20,17 @@ for (u, v, flag) in test_G.edges.data('flag'):
     edges.append(((u, v), int(flag)))
 
 # 划分社区算法
-social1 = set()
-social2 = set()
-social1.add(edges[0][0][0])
-for edge in edges:
-    print(edge)
-    if edge[1] == 1 and (edge[0][0] in social1 or edge[0][1] in social1):
-        social1.add(edge[0][0])
-        social1.add(edge[0][1])
-    if edge[1] == 1 and (edge[0][0] not in social1 and edge[0][1] not in social1):
-        social2.add(edge[0][0])
-        social2.add(edge[0][1])
-print(social1)
-print(social2)
-
+social_set = set()
+social_set.add('1')
 for node in test_G.nodes:
     print(node)
+    node_set = set()
+    for nbr in test_G[node]:
+        if test_G[node][nbr]['flag'] == 1:
+            social_set.add(nbr)
+        if nbr in social_set:
+            pass
+        else:
+            node_set.add(nbr)
+print(social_set)
+
