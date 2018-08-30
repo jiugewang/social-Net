@@ -20,17 +20,51 @@ for (u, v, flag) in test_G.edges.data('flag'):
     edges.append(((u, v), int(flag)))
 
 # 划分社区算法
-social_set = set()
-social_set.add('1')
-for node in test_G.nodes:
-    print(node)
-    node_set = set()
-    for nbr in test_G[node]:
-        if test_G[node][nbr]['flag'] == 1:
-            social_set.add(nbr)
-        if nbr in social_set:
-            pass
-        else:
-            node_set.add(nbr)
-print(social_set)
+visited = {}
 
+
+def breadth_first_search(root=None):
+    queue = []
+    social = []
+    nodes = test_G.nodes
+
+    def bfs(first_node):
+        order = [first_node]
+        while len(queue) > 0:
+            node = queue.pop(0)
+
+            visited[node] = True
+            for n in test_G[node]:
+                if (not n in visited) and (not n in queue) and test_G[node][n]['flag'] == 1:
+                    queue.append(n)
+                    order.append(n)
+        social.append(order)
+
+    if root:
+        queue.append(root)
+        # order.append(root)
+        bfs(root)
+
+    for node in test_G.nodes:
+        if not node in visited:
+            queue.append(node)
+            bfs(node)
+
+    # print(social)
+    # print(queue)
+    # print(visited)
+    """
+    order1 = []
+    for node in test_G.nodes:
+        if not node in visited:
+            queue.append(node)
+            order1.append(node)
+            bfs()
+    print(order1)
+    """
+
+    return social
+
+
+social = breadth_first_search('1')
+print(social)

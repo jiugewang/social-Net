@@ -104,6 +104,8 @@ def get_jump1_3dimension_different_size_matrix(mygraph, edge):
         source_node_set.remove(source_node)
     if target_node in source_node_set:
         source_node_set.remove(target_node)
+    if not source_node_set:
+        source_node_set.add(source_node)
 
     for target_nbr in mygraph[target_node]:
         if target_nbr == source_node:
@@ -114,6 +116,8 @@ def get_jump1_3dimension_different_size_matrix(mygraph, edge):
         target_node_set.remove(source_node)
     if target_node in target_node_set:
         target_node_set.remove(target_node)
+    if not target_node_set:
+        target_node_set.add(target_node)
 
     intersection_set = source_node_set & target_node_set
     source_node_list = list(source_node_set)

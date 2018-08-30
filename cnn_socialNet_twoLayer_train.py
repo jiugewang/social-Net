@@ -122,6 +122,86 @@ def dropout(x, keep):
     return tf.nn.dropout(x, keep)
 
 
+def cnn_layer(classnum):
+    """create cnn layer"""
+    W1 = weight_variable([7, 7, 3, 64])  # 卷积核大小(7,7)， 输入通道(3)， 输出通道(64)
+    b1 = bias_variable([64])
+    # conv1
+    conv1 = tf.nn.relu(conv2d(x_data, W1) + b1)
+    # pool1
+    pool1 = max_pool(conv1)
+    # norm1
+    norm1 = tf.nn.lrn(pool1, 4, bias=1.0, alpha=0.001 / 9.0, beta=0.75, name='norm1')
+    # 减少过拟合，随机让某些权重不更新
+    # drop1 = dropout(norm1, keep_prob_5)  # 32 * 64 * 64 多个输入channel 被filter内积掉了
+
+    W2a = weight_variable([1, 1, 64, 64])
+    b2a = bias_variable([64])
+    W2 = weight_variable([3, 3, 64, 192])
+    b2 = bias_variable([192])
+    # conv2a
+    conv2a = tf.nn.relu(conv2d(norm1, W2a) + b2a)
+    # conv2
+    conv2 = tf.nn.relu(conv2d(conv2a, W2) + b2)
+    # norm2
+    norm2 = tf.nn.lrn(conv2, 4, bias=1.0, alpha=0.001 / 9.0, beta=0.75, name='norm2')
+    # pool2
+    pool2 = max_pool(norm2)  # 32 * 32
+
+    W3a = weight_variable([1, 1, 192, 192])
+    b3a = bias_variable([192])
+    W3 = weight_variable([3, 3, 192, 384])
+    b3 = bias_variable([384])
+    # conv3a
+    conv3a = tf.nn.relu(conv2d(pool2, W3a) + b3a)
+    # conv3
+    conv3 = tf.nn.relu(conv2d(conv3a, W3) + b3)
+    # pool3
+    pool3 = max_pool(conv3)  # 16 * 16
+
+    W4a = weight_variable([1, 1, 384, 384])
+    b4a = bias_variable([384])
+    W4 = weight_variable([3, 3, 384, 256])
+    b4 = bias_variable([256])
+    # conv4a
+    conv4a = tf.nn.relu(conv2d(pool3, W4a) + b4a)
+    # conv4
+    conv4 = tf.nn.relu(conv2d(conv4a, W4) + b4)
+
+    W5a = weight_variable([1, 1, 256, 256])
+    b5a = bias_variable([256])
+    W5 = weight_variable([3, 3, 256, 256])
+    b5 = bias_variable([256])
+    # conv4a
+    conv5a = tf.nn.relu(conv2d(conv4, W5a) + b5a)
+    # conv4
+    conv5 = tf.nn.relu(conv2d(conv5a, W5) + b5)
+
+    W6a = weight_variable([1, 1, 256, 256])
+    b6a = bias_variable([256])
+    W6 = weight_variable([3, 3, 256, 256])
+    b6 = bias_variable([256])
+    # conv4a
+    conv6a = tf.nn.relu(conv2d(conv5, W6a) + b6a)
+    # conv4
+    conv6 = tf.nn.relu(conv2d(conv6a, W6) + b6)
+    pool4 = max_pool(conv6)  # 8 * 8
+
+    # 全连接层
+    Wf = weight_variable([8 * 8 * 256, 1024])
+    bf = bias_variable([1024])
+    drop3_flat = tf.reshape(pool4, [-1, 8 * 8 * 256])
+    dense = tf.nn.relu(tf.matmul(drop3_flat, Wf) + bf)
+    dropf = dropout(dense, keep_prob_75)
+
+    # 输出层
+    Wout = weight_variable([1024, classnum])
+    bout = weight_variable([classnum])
+    # out = tf.matmul(dropf, Wout) + bout
+    out = tf.add(tf.matmul(dropf, Wout), bout)
+    return out
+
+
 def cnn_1jump_layer(classnum):
     """create cnn layer"""
     W1 = weight_variable([7, 7, 3, 64])  # 卷积核大小(7,7)， 输入通道(3)， 输出通道(64)

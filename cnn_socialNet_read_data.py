@@ -2,17 +2,18 @@
 import networkx as nx
 
 
-def get_graph(file_path):
+def get_graph(file_path, split=None):
     """
     通过社区的边文件获取网络
     :param file_path: 存放社区边的文件
+    :param split: 分割符
     :return: 社区网络
     """
     my_graph = nx.Graph()
     f = open(file_path)
     line = f.readline()
     while line:
-        edge = line.split()
+        edge = line.split(split)
         my_graph.add_edge(edge[0].strip(), edge[1].strip())
         line = f.readline()
     f.close()
