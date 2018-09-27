@@ -13,11 +13,11 @@ print(test_G.edges())
 # 划分社区算法
 
 
-def breadth_first_search(root=None):
+def breadth_first_search(G, root=None):
     visited = {}
     queue = []
     social = []
-    nodes = test_G.nodes
+    nodes = G.nodes
 
     def bfs(first_node):
         order = [first_node]
@@ -25,7 +25,7 @@ def breadth_first_search(root=None):
             node = queue.pop(0)
 
             visited[node] = True
-            for n in test_G[node]:
+            for n in G[node]:
                 if (not n in visited) and (not n in queue):
                     queue.append(n)
                     order.append(n)
@@ -36,7 +36,7 @@ def breadth_first_search(root=None):
         # order.append(root)
         bfs(root)
 
-    for node in test_G.nodes:
+    for node in G.nodes:
         if not node in visited:
             queue.append(node)
             bfs(node)
@@ -57,5 +57,5 @@ def breadth_first_search(root=None):
     return social
 
 
-social = breadth_first_search('1')
+social = breadth_first_search(test_G, '1')
 print(social)
