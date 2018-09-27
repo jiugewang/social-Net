@@ -4,6 +4,7 @@ import cnn_socialNet_read_data
 
 
 # NMI
+'''
 def NMI(A,B):
     # len(A) should be equal to len(B)
     total = len(A)
@@ -32,6 +33,59 @@ def NMI(A,B):
         Hy = Hy - (idBOccurCount/total)*math.log(idBOccurCount/total+eps, 2)
     MIhat = 2.0*MI/(Hx+Hy)
     return MIhat
+'''
+
+
+def h(p):
+    return -p * (math.log(p)/math.log(2.0))
+
+
+def nmi(list, list2, G):
+    """
+    计算NMI
+    :param A: 真实社区：[[1,2,3],[3,4,5],...]
+    :param B: 自己算法检测的社区：[[1,2,3],[4,5,6],...]
+    :return:
+    """
+    node_count = len(G.nodes())
+    comm_count_A = len(list)  # 真实社区的个数
+    comm_count_B = len(list2)  # 自己算法计算的社区个数
+
+    X = [0]*comm_count_B
+    Y = [0]*comm_count_A
+
+    XY = [[0 for i in range(comm_count_A)] for i in range(comm_count_B)]
+
+    i = 0
+    j = 0
+    for com1 in list2:
+        j=0
+        com1_set = set(com1)
+        for com2 in list:
+            com2_set = set(com2)
+            XY[i][j] = len(com1_set & com2_set)
+            X[i] += XY[i][j]
+            Y[j] += XY[i][j]
+            j += 1
+        i += 1
+    Ixy = 0
+    for m in range(comm_count_B):
+        for n in range(comm_count_A):
+            if XY[m][n] > 0:
+                Ixy += (XY[m][n]/node_count)*math.log(XY[m][n]*node_count/(X[m]*Y[n])/math.log(2.0))
+
+    Hx = 0
+    Hy = 0
+
+    for m in range(comm_count_B):
+        if X[m] > 0:
+            Hx += h(X[m]/node_count)
+    for m in range(comm_count_A):
+        if Y[m] > 0:
+            Hy += h(Y[m]/node_count)
+
+    InormXy = 2*Ixy/(Hx + Hy)
+    return InormXy
 
 
 def precision(A, B):
@@ -188,9 +242,9 @@ def R(comm,G):
 if __name__ == '__main__':
     A = np.array([12,15,19,21,26,33,38,41,42,45,48,55,58,59,60,61,71,76,80,82,83,89,102,104,109,110,117])
     B = np.array([1,193,121,48,58,41,104,82,55,26,109,117,60,102,42,83,110,71,89,33,38,80,21,76,59,61,15,45])
-    # A = np.array([3,5,6])
-    # B = np.array([3,5,7])
-    print('NMI:', NMI(A, B))
+    # A = np.array([3,5,6,7],[1,2])
+    # B = np.array([3,5,7],[1,2,6])
+    # print('NMI:', NMI(A, B))
     print('P:', precision(A, B))
     print('R:', recall(A, B))
     print('F1:',f1(A, B))
@@ -218,3 +272,4 @@ if __name__ == '__main__':
     print('局部模块度：', R(comm1, test_G))
     print('局部模块度：', R(comm2, test_G))
     print('局部模块度：', R(comm3 , test_G))
+    print("nmi:", nmi(community1, community2, test_G))
