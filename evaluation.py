@@ -40,21 +40,21 @@ def h(p):
     return -p * (math.log(p)/math.log(2.0))
 
 
-def nmi(list, list2, G):
+def nmi(A, B, G):
     """
     计算NMI
     :param A: 真实社区：[[1,2,3],[3,4,5],...]
     :param B: 自己算法检测的社区：[[1,2,3],[4,5,6],...]
     :return:
     """
-    node_count = len(G.nodes())
-    comm_count_A = len(list)  # 真实社区的个数
-    comm_count_B = len(list2)  # 自己算法计算的社区个数
+    n = len(G.nodes())
+    comm_count_A = len(A)  # real communities
+    comm_count_B = len(B)  # resulted communities
 
     X = [0]*comm_count_B
     Y = [0]*comm_count_A
 
-    XY = [[0 for i in range(comm_count_A)] for i in range(comm_count_B)]
+    XY = [[0 for i in range(comm_count_B)] for i in range(comm_count_A)]
 
     i = 0
     j = 0
@@ -272,4 +272,4 @@ if __name__ == '__main__':
     print('局部模块度：', R(comm1, test_G))
     print('局部模块度：', R(comm2, test_G))
     print('局部模块度：', R(comm3 , test_G))
-    print("nmi:", nmi(community1, community2, test_G))
+    print("nmi:", nmi(community1, community1, test_G))
