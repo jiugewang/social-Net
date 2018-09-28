@@ -20,27 +20,29 @@ def merge_community(comm_list, G):
             virtual_social.append(comm)
     matrix_r = [[0 for i in range(len(real_social))] for i in range(len(virtual_social))]
 
-    i = 0
-    for virtual in virtual_social:
-        j = 0
-        for real in real_social:
-            merge_com = real+virtual
-            # print(merge_com)
-            # print(virtual)
-            virtual_r = evaluation.R(virtual, G)
+    for i in range(len(virtual_social)):
+        for j in range(len(real_social)):
+            merge_com = virtual_social[i]+real_social[j]
+            virtual_comm = virtual_social[i]
+            virtual_r = evaluation.R(virtual_comm, G)
             merge_r = evaluation.R(merge_com, G)
             data_r = merge_r - virtual_r
             matrix_r[i][j] = data_r
-            j += 1
-        i += 1
-    # print(len(matrix_r))
+    print(matrix_r)
+    print(len(matrix_r))
     for m in range(len(matrix_r)):
-        real_social[matrix_r[m].index(max(matrix_r[m]))]+(virtual_social[m])
+        row_list = matrix_r[m]
+        row = row_list.index(max(row_list))
+        print(row_list)
+        print(row)
+        real_social[row] + virtual_social[m]
+        #real_social[matrix_r[m].index(max(matrix_r[m]))]+(virtual_social[m])
+        #print(matrix_r[m])
     return real_social
 
 
 football_network = './small_data/football-edges.txt'
 G = cnn_socialNet_read_data.get_graph(football_network,split=',')
 print(merge_community(social_list, G))
-print(len(merge_community(social_list, G)))
-print('nmi:',nmi_test.nmi())
+#print(len(merge_community(social_list, G)))
+#print('nmi:',nmi_test.nmi())
